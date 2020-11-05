@@ -11,12 +11,11 @@ request(address, (error, response, body) => {
   if (!error) {
     try {
       if (fs.existsSync(filepath)) {
-        if (overwrite()) writefile(data);
+        overwrite(data);
       }
     } catch (err) {
       writefile(data);
     }
-    writefile(data);
   } else {
     console.log(`invalid URL`);
   }
@@ -25,10 +24,14 @@ request(address, (error, response, body) => {
 const writefile = (data) => {
   fs.writeFile(filepath, data, function (err) {
     if (err) console.log(`path not available`);
+    else {
+      const stats = fs.statSync(filepath);
+      console.log(`Downloaded and saved ${stats.size} bytes to ./index.html`);
+    }
   });
 };
 
-const overwrite = () => {
+const overwrite = (data) => {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -36,7 +39,7 @@ const overwrite = () => {
   rl.question('File exists Do you want to overwrite? ', (answer) => {
     if (answer === `y` || answer === `Y`) {
       rl.close();
-      return true;
+      return writefile(data);
     } else {
       rl.close();
       return false;
